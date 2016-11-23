@@ -8,7 +8,9 @@ layer {
   python_param {
     module: 'roi_data_layer.layer'
     layer: 'RoIDataLayer'
-    param_str: "'num_classes': 21"
+    #
+    #param_str: "'num_classes': 21"
+    param_str: "'num_classes': 4"#按训练集类别改，该值为类别数+1
   }
 }
 

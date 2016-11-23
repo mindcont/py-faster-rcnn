@@ -1,3 +1,4 @@
+#encoding:utf-8
 # --------------------------------------------------------
 # Fast R-CNN
 # Copyright (c) 2015 Microsoft
@@ -101,7 +102,9 @@ class imdb(object):
 
     def append_flipped_images(self):
         num_images = self.num_images
-        widths = self._get_widths()
+        # widths = self._get_widths()
+        widths = [PIL.Image.open(self.image_path_at(i)).size[0]
+                 for i in xrange(num_images)]
         for i in xrange(num_images):
             boxes = self.roidb[i]['boxes'].copy()
             oldx1 = boxes[:, 0].copy()

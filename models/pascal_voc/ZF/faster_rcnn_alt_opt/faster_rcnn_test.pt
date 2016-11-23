@@ -303,7 +303,9 @@ layer {
   bottom: "fc7"
   top: "cls_score"
   inner_product_param {
-    num_output: 21
+    #
+    #num_output: 21
+    num_output: 4 #按训练集类别改，该值为类别数+1
   }
 }
 layer {
@@ -312,7 +314,9 @@ layer {
   bottom: "fc7"
   top: "bbox_pred"
   inner_product_param {
-    num_output: 84
+    #
+    #num_output: 84
+    num_output: 16 #按训练集类别改，该值为（类别数+1）*4 
   }
 }
 layer {
