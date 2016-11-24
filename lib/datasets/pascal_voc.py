@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------------------------------
 # Fast R-CNN
 # Copyright (c) 2015 Microsoft
@@ -6,6 +7,8 @@
 # --------------------------------------------------------
 
 import os
+import sys
+sys.path.append('/home/pi/now/lib')
 from datasets.imdb import imdb
 import datasets.ds_utils as ds_utils
 import xml.etree.ElementTree as ET
@@ -21,18 +24,26 @@ from fast_rcnn.config import cfg
 
 class pascal_voc(imdb):
     def __init__(self, image_set, year, devkit_path=None):
+        """
+        初始化函数，对应于pascal数据集
+        """
         imdb.__init__(self, 'voc_' + year + '_' + image_set)
         self._year = year
         self._image_set = image_set
         self._devkit_path = self._get_default_path() if devkit_path is None \
                             else devkit_path
-        self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
+        # self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
+        # self._classes = ('__background__', # always index 0
+        #                  'aeroplane', 'bicycle', 'bird', 'boat',
+        #                  'bottle', 'bus', 'car', 'cat', 'chair',
+        #                  'cow', 'diningtable', 'dog', 'horse',
+        #                  'motorbike', 'person', 'pottedplant',
+        #                  'sheep', 'sofa', 'train', 'tvmonitor')
+
+        self._data_path = os.path.join(self._devkit_path, 'lara')
         self._classes = ('__background__', # always index 0
-                         'aeroplane', 'bicycle', 'bird', 'boat',
-                         'bottle', 'bus', 'car', 'cat', 'chair',
-                         'cow', 'diningtable', 'dog', 'horse',
-                         'motorbike', 'person', 'pottedplant',
-                         'sheep', 'sofa', 'train', 'tvmonitor')
+                         'green','red','orange')
+
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
@@ -57,12 +68,14 @@ class pascal_voc(imdb):
     def image_path_at(self, i):
         """
         Return the absolute path to image i in the image sequence.
+        根据 图片index 返回其对应的绝对路径
         """
         return self.image_path_from_index(self._image_index[i])
 
     def image_path_from_index(self, index):
         """
         Construct an image path from the image's "index" identifier.
+        构造图片路径
         """
         image_path = os.path.join(self._data_path, 'JPEGImages',
                                   index + self._image_ext)
@@ -73,6 +86,7 @@ class pascal_voc(imdb):
     def _load_image_set_index(self):
         """
         Load the indexes listed in this dataset's image set file.
+        加载数据集list文本
         """
         # Example path to image set file:
         # self._devkit_path + /VOCdevkit2007/VOC2007/ImageSets/Main/val.txt
@@ -87,6 +101,7 @@ class pascal_voc(imdb):
     def _get_default_path(self):
         """
         Return the default path where PASCAL VOC is expected to be installed.
+        返回pascal 数据集默认位置
         """
         return os.path.join(cfg.DATA_DIR, 'VOCdevkit' + self._year)
 
@@ -95,6 +110,7 @@ class pascal_voc(imdb):
         Return the database of ground-truth regions of interest.
 
         This function loads/saves from/to a cache file to speed up future calls.
+        读取并返回 ground-truth 的db ，并通过cache 文件来加速今后的使用
         """
         cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
         if os.path.exists(cache_file):
@@ -117,6 +133,7 @@ class pascal_voc(imdb):
         Ground-truth ROIs are also included.
 
         This function loads/saves from/to a cache file to speed up future calls.
+        读取并返回 selective search 方法产生的db，并通过cache文件来加速今后的使用
         """
         cache_file = os.path.join(self.cache_path,
                                   self.name + '_selective_search_roidb.pkl')
@@ -140,6 +157,9 @@ class pascal_voc(imdb):
         return roidb
 
     def rpn_roidb(self):
+        """
+
+        """
         if int(self._year) == 2007 or self._image_set != 'test':
             gt_roidb = self.gt_roidb()
             rpn_roidb = self._load_rpn_roidb(gt_roidb)
@@ -150,6 +170,8 @@ class pascal_voc(imdb):
         return roidb
 
     def _load_rpn_roidb(self, gt_roidb):
+        """
+        """
         filename = self.config['rpn_file']
         print 'loading {}'.format(filename)
         assert os.path.exists(filename), \
@@ -159,6 +181,9 @@ class pascal_voc(imdb):
         return self.create_roidb_from_box_list(box_list, gt_roidb)
 
     def _load_selective_search_roidb(self, gt_roidb):
+        """
+        加载预选框文件
+        """
         filename = os.path.abspath(os.path.join(cfg.DATA_DIR,
                                                 'selective_search_data',
                                                 self.name + '.mat'))
@@ -181,6 +206,7 @@ class pascal_voc(imdb):
         """
         Load image and bounding boxes info from XML file in the PASCAL VOC
         format.
+        以pascal voc形式从注解xml 文件中加载图片和对应的边框
         """
         filename = os.path.join(self._data_path, 'Annotations', index + '.xml')
         tree = ET.parse(filename)
@@ -205,10 +231,17 @@ class pascal_voc(imdb):
         for ix, obj in enumerate(objs):
             bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
-            x1 = float(bbox.find('xmin').text) - 1
-            y1 = float(bbox.find('ymin').text) - 1
-            x2 = float(bbox.find('xmax').text) - 1
-            y2 = float(bbox.find('ymax').text) - 1
+            # x1 = float(bbox.find('xmin').text) - 1
+            # y1 = float(bbox.find('ymin').text) - 1
+            # x2 = float(bbox.find('xmax').text) - 1
+            # y2 = float(bbox.find('ymax').text) - 1
+            # solve the error " assert (boxes[:, 2] >= boxes[:, 0]).all() AssertionError "
+            # for more http://blog.csdn.net/XZZPPP/article/details/52036794 
+            
+            x1 = float(bbox.find('xmin').text)
+            y1 = float(bbox.find('ymin').text)
+            x2 = float(bbox.find('xmax').text)
+            y2 = float(bbox.find('ymax').text)
             cls = self._class_to_ind[obj.find('name').text.lower().strip()]
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
@@ -229,6 +262,9 @@ class pascal_voc(imdb):
         return comp_id
 
     def _get_voc_results_file_template(self):
+        """
+        获取voc答案标准格式
+        """
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:s}.txt'
         path = os.path.join(
@@ -240,6 +276,9 @@ class pascal_voc(imdb):
         return path
 
     def _write_voc_results_file(self, all_boxes):
+        """
+        将预测结果以voc答案标准格式写入文件
+        """
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
@@ -303,6 +342,9 @@ class pascal_voc(imdb):
         print('--------------------------------------------------------------')
 
     def _do_matlab_eval(self, output_dir='output'):
+        """
+        根据matlab的evluation接口来做结果的分析
+        """
         print '-----------------------------------------------------'
         print 'Computing results with the official MATLAB eval code.'
         print '-----------------------------------------------------'
