@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
+=======
+#encoding:utf-8
+>>>>>>> master
 # --------------------------------------------------------
 # Fast R-CNN
 # Copyright (c) 2015 Microsoft
@@ -40,9 +44,15 @@ class pascal_voc(imdb):
         #                  'motorbike', 'person', 'pottedplant',
         #                  'sheep', 'sofa', 'train', 'tvmonitor')
 
+<<<<<<< HEAD
         self._data_path = os.path.join(self._devkit_path, 'lara')
         self._classes = ('__background__', # always index 0
                          'green','red','orange')
+=======
+        self._data_path = os.path.join(self._devkit_path, 'test')
+        self._classes = ('__background__', # always index 0
+                         'green', 'red','orange')
+>>>>>>> master
 
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
